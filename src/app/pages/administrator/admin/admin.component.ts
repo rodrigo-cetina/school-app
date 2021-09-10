@@ -1,13 +1,13 @@
 ﻿import { Component, OnInit } from '@angular/core';
 import { first } from 'rxjs/operators';
 
-import { Administrator } from '@app/_models';
+import { IAdministrator } from '@app/_models';
 import { AdministratorService } from '@app/_services';
 
 @Component({ templateUrl: 'admin.component.html' })
 export class AdminComponent implements OnInit {
     loading = false;
-    administrators: Administrator[] = [];
+    administrators: IAdministrator[] = [];
 
     constructor(private administratorService: AdministratorService) { }
 

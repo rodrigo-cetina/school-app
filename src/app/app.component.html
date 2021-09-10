@@ -1,9 +1,39 @@
 ﻿<!-- nav -->
-<nav class="navbar navbar-expand navbar-dark bg-dark" *ngIf="user">
-    <div class="navbar-nav">
-        <a class="nav-item nav-link" routerLink="/">Inicio</a>
-        <a class="nav-item nav-link" routerLink="/admin" *ngIf="isAdmin">Administrador</a>
-        <a class="nav-item nav-link" (click)="logout()">Salir</a>
+<nav class="navbar navbar-expand-md navbar-dark bg-dark" *ngIf="user">
+    <a class="navbar-brand" href="/">
+        <img src="/assets/logo-perti.png" width="56" height="40" alt="">
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto">
+            <a class="nav-item nav-link" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Home</a>
+            <a class="nav-item nav-link" routerLink="/teachers" routerLinkActive="active" *ngIf="isAdmin">Teachers</a>
+            <a class="nav-item nav-link" routerLink="/students" routerLinkActive="active" *ngIf="isAdmin">Students</a>
+            <a class="nav-item nav-link" routerLink="/subjects" routerLinkActive="active" *ngIf="isAdmin">Subjects</a>
+            <a class="nav-item nav-link" routerLink="/groups" routerLinkActive="active" *ngIf="isAdmin">Groups</a>
+            <a class="nav-item nav-link" routerLink="/student-score" routerLinkActive="active" *ngIf="isStudent">Score</a>
+            <a class="nav-item dropdown nav-link dropdown-toggle" 
+               id="navbarDropdownMenuLink" 
+               role="button" 
+               data-toggle="dropdown" 
+               aria-haspopup="true" 
+               aria-expanded="false"
+               routerLinkActive="active"
+               *ngIf="isTeacher"
+            >
+                Groups
+                <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                    <a *ngFor="let group of groups" class="dropdown-item" routerLink="/group-score/{{group.id}}">
+                        {{group.code}} {{group.subject.title}}
+                    </a>
+                </div>
+            </a>
+        </div>
+        <form [formGroup] = "" class="form-inline">
+            <button class="btn btn-outline-danger" type="button" (click)="logout()">Sign out</button>
+        </form>  
     </div>
 </nav>
 

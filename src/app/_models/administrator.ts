@@ -1,11 +1,7 @@
-﻿import { Role } from "./role";
+﻿import { IPerson } from "./person";
+import { Role } from "./role";
+import { Gender } from "./gender";
 
-export class Administrator {
-    person: {
-        id: number;
-        firstName: string;
-        lastName: string;
-        email: string;
-        role: Role;
-    }
+export interface IAdministrator {
+    person: IPerson
 }

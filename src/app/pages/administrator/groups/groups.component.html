@@ -1,0 +1,204 @@
+<div class="card mt-4 mx-auto">
+  <h4 class="card-header d-flex justify-content-between align-items-center">
+    <div>
+      Groups
+    </div>
+    <div>
+      <button class="btn btn-primary" type="button" data-toggle="modal" (click)="onCreate(contentModal)">Create</button>
+    </div>
+  </h4>
+  <div class="card-body p-0">
+    <div *ngIf="loadingData" class="d-flex justify-content-center p-3">
+      <div class="spinner-border" role="status">
+        <span class="sr-only">Loading...</span>
+      </div>
+    </div>
+    <div *ngIf="!loadingData && groups.length == 0" class="d-flex justify-content-center p-3">
+      <span>No records</span>
+    </div>
+    <ul class="list-group list-group-flush">
+      <li *ngFor="let group of groups" class="list-group-item d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center">
+          <div [attr.data-letters]="group.subject.title.substring(0, 1)"></div>
+          <div class="d-flex flex-column justify-content-center">
+            <span class="text-muted" style="font-size: 12px;">{{group.career.name}}</span>
+            <span>{{group.code}} {{group.subject.title}}</span>
+          </div>
+        </div>
+        <div>
+          <button class="btn btn-secondary" type="button" data-toggle="modal" (click)="onEdit(contentModal, group)">
+              <i class="bi-pencil-square"></i>
+          </button>
+          <button class="btn btn-info ml-2" type="button" data-toggle="modal" (click)="onViewStudents(contentModalStudent, group)">
+              <i class="bi-people"></i>
+          </button>
+          <button class="btn btn-danger ml-2" type="button" (click)="onDelete(contentModalDelete, group)">
+              <i class="bi-trash"></i>
+          </button>
+        </div>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<ng-template #contentModal let-modal>
+  <form [formGroup]="dataForm" (ngSubmit)="onSubmit(modal)">
+    <div class="modal-header">
+      <h5 class="modal-title">{{isNewForm ? 'Create' : 'Edit'}} Group</h5>
+      <button type="button" class="close" aria-label="Close" (click)="modal.dismiss()">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" formControlName="id" class="form-control" />
+      <div class="form-group">
+          <label for="careerid">Career</label>
+          <select formControlName="careerid" class="form-control" [ngClass]="{ 'is-invalid': submitted && f.careerid.errors }">
+            <option *ngFor="let career of careers" [value]="career.id">{{career.name}}</option>
+          </select>
+          <div *ngIf="submitted && f.careerid.errors" class="invalid-feedback">
+              <div *ngIf="f.careerid.errors.required">Career is required</div>
+          </div>
+      </div>
+      <div class="form-group">
+          <label for="subjectid">Subject</label>
+          <select formControlName="subjectid" class="form-control" [ngClass]="{ 'is-invalid': submitted && f.subjectid.errors }">
+            <option *ngFor="let subject of subjects" [value]="subject.id">{{subject.title}}</option>
+          </select>
+          <div *ngIf="submitted && f.subjectid.errors" class="invalid-feedback">
+              <div *ngIf="f.subjectid.errors.required">Subject is required</div>
+          </div>
+      </div>
+      <div class="form-group">
+          <label for="code">Code</label>
+          <input type="text" formControlName="code" class="form-control" [ngClass]="{ 'is-invalid': submitted && f.code.errors }" />
+          <div *ngIf="submitted && f.code.errors" class="invalid-feedback">
+              <div *ngIf="f.code.errors.required">Code is required</div>
+          </div>
+      </div>
+      <div class="form-group">
+          <label for="teacherid">Teacher</label>
+          <select formControlName="teacherid" class="form-control" [ngClass]="{ 'is-invalid': submitted && f.teacherid.errors }">
+            <option *ngFor="let teacher of teachers" [value]="teacher.person.id">{{teacher.person.lastName}}, {{teacher.person.firstName}}</option>
+          </select>
+          <div *ngIf="submitted && f.teacherid.errors" class="invalid-feedback">
+              <div *ngIf="f.teacherid.errors.required">Teacher is required</div>
+          </div>
+      </div>
+      <div *ngIf="error" class="alert alert-danger mt-3 mb-0">{{error}}</div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-light" (click)="modal.dismiss()">Cancel</button>
+      <button [disabled]="loading" class="btn btn-primary">
+        Save changes
+        <span *ngIf="loading" class="spinner-border spinner-border-sm mr-1"></span>
+      </button>
+    </div>
+  </form>
+</ng-template>
+
+<ng-template #contentModalDelete let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title">Delete Group</h5>
+    <button type="button" class="close" aria-label="Close" (click)="modal.dismiss()">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <p>Are you sure you want to delete <strong>"{{currentGroup.code }} {{currentGroup.subject.title}}"</strong> group?</p>
+    <div *ngIf="errorDelete" class="alert alert-danger mt-3 mb-0">{{errorDelete}}</div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss()">Cancel</button>
+    <button type="button" [disabled]="loadingDelete" class="btn btn-danger" (click)="modal.close(true)">
+      Confirm delete
+      <span *ngIf="loadingDelete" class="spinner-border spinner-border-sm mr-1"></span>
+    </button>
+  </div>
+</ng-template>
+
+<ng-template #contentModalStudent let-modal>
+  <div class="modal-header">
+    <div class="d-flex flex-column justify-content-center">
+        <span class="text-muted" style="font-size: 12px;">{{currentGroup.career.name}}</span>
+        <span>{{currentGroup.code}} {{currentGroup.subject.title}}</span>
+    </div>
+    <button type="button" class="close" aria-label="Close" (click)="modal.dismiss()">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    
+    <form [formGroup]="dataFormStudent" (ngSubmit)="onSubmitStudent(modal)">
+        <input type="hidden" formControlName="id" class="form-control" />
+        <input type="hidden" formControlName="groupid" class="form-control" />
+        <div class="d-flex">
+
+            <div class="form-group w-100">
+              <select formControlName="studentid" class="form-control" [ngClass]="{ 'is-invalid': submittedStudent && fs.studentid.errors }">
+                <option *ngFor="let student of students" [value]="student.person.id">{{student.person.lastName}}, {{student.person.firstName}}</option>
+              </select>
+              <div *ngIf="submittedStudent && fs.studentid.errors" class="invalid-feedback">
+                  <div *ngIf="fs.studentid.errors.required">Student is required</div>
+              </div>
+            </div>
+    
+            
+            <button type="submit" [disabled]="loadingStudent" class="btn btn-primary ml-2" style="width: 150px; height: 38px;">
+                Add Student
+                <span *ngIf="loadingDelete" class="spinner-border spinner-border-sm mr-1"></span>
+            </button>
+        </div>
+        
+        <div *ngIf="errorStudent" class="alert alert-danger mt-3 mb-0">{{errorStudent}}</div>
+
+    </form>
+
+    <h6>Students</h6>
+
+    <div *ngIf="loadingDataStudent" class="d-flex justify-content-center p-3">
+      <div class="spinner-border" role="status">
+        <span class="sr-only">Loading...</span>
+      </div>
+    </div>
+    <div *ngIf="!loadingDataStudent && groupStudents.length == 0" class="d-flex justify-content-center p-3">
+      <span>No students</span>
+    </div>
+    <ul class="list-group list-group-flush">
+      <li *ngFor="let groupStudent of groupStudents" class="list-group-item d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center">
+          <div [attr.data-letters]="groupStudent.student.person.firstName.substring(0, 1)"></div>
+          <div class="d-flex flex-column justify-content-center">
+            <span class="text-muted" style="font-size: 12px;">{{groupStudent.student.code}}</span>
+            <span>{{groupStudent.student.person.lastName}}, {{groupStudent.student.person.firstName}}</span>
+          </div>
+        </div>
+        <div>
+          <button class="btn btn-danger ml-2" type="button" (click)="onDeleteStudent(contentModalDeleteStudent, groupStudent)">
+              <i class="bi-trash"></i>
+          </button>
+        </div>
+      </li>
+    </ul>
+  </div>
+</ng-template>
+
+<ng-template #contentModalDeleteStudent let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title">Remove Student</h5>
+    <button type="button" class="close" aria-label="Close" (click)="modal.dismiss()">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <p>Are you sure you want to remove <strong>"{{currentGroupStudent.student.person.lastName}}, {{currentGroupStudent.student.person.firstName}}"</strong> student?</p>
+    <div *ngIf="errorDeleteStudent" class="alert alert-danger mt-2 mb-0">{{errorDeleteStudent}}</div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.dismiss()">Cancel</button>
+    <button type="button" [disabled]="loadingDeleteStudent" class="btn btn-danger" (click)="modal.close(true)">
+      Confirm delete
+      <span *ngIf="loadingDeleteStudent" class="spinner-border spinner-border-sm mr-1"></span>
+    </button>
+  </div>
+</ng-template>
